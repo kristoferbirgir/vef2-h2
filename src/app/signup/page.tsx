@@ -1,29 +1,29 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { login } = useAuth()
+  const { signup } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
-      await login({ email, password })
+      await signup({ email, password })
       router.push('/')
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Signup failed:', error)
     }
   }
 
   return (
     <main className="max-w-md mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+      <h2 className="text-xl font-bold mb-4">Sign Up</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-semibold">
@@ -50,13 +50,13 @@ export default function LoginPage() {
           </label>
         </div>
         <button type="submit" className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
-          Login
+          Sign Up
         </button>
       </form>
       <p className="mt-4 text-center">
-        Don&apos;t have an account?{' '}
-        <Link href="/signup" className="text-teal-600 hover:underline">
-          Sign Up
+        Already have an account?{' '}
+        <Link href="/login" className="text-teal-600 hover:underline">
+          Sign In
         </Link>
       </p>
     </main>
