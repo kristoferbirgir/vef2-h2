@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignInAlt, faUserPlus, faEnvelope, faLock } from '@fortawesome/free-solid-svg-icons'
+import { faSignInAlt, faUserPlus, faUser, faLock } from '@fortawesome/free-solid-svg-icons'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { login } = useAuth()
   const router = useRouter()
@@ -16,10 +16,11 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
-      await login({ email, password })
+      await login({ username, password })
       router.push('/')
     } catch (error) {
       console.error('Login failed:', error)
+      alert(error instanceof Error ? error.message : 'Login error')
     }
   }
 
@@ -29,14 +30,14 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-semibold items-center">
-            <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-1" />
-            Netfang:
+            <FontAwesomeIcon icon={faUser} className="w-4 h-4 mr-1" />
+            Notendanafn:
           </label>
           <input
-            type="email"
-            value={email}
+            type="text"
+            value={username}
             required
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
           />
         </div>

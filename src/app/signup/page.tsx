@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUserPlus, faSignInAlt, faEnvelope, faLock, faUser } from '@fortawesome/free-solid-svg-icons'
+import { faUserPlus, faSignInAlt, faUser, faLock } from '@fortawesome/free-solid-svg-icons'
 
 export default function SignupPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { signup } = useAuth()
   const router = useRouter()
@@ -17,10 +16,11 @@ export default function SignupPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     try {
-      await signup({ name, email, password })
+      await signup({ username, password })
       router.push('/')
     } catch (error) {
       console.error('Signup failed:', error)
+      alert(error instanceof Error ? error.message : 'Signup error')
     }
   }
 
@@ -31,26 +31,13 @@ export default function SignupPage() {
         <div>
           <label className="mb-1 font-semibold flex items-center">
             <FontAwesomeIcon icon={faUser} className="w-4 h-4 mr-1" />
-            Nafn:
+            Notendanafn:
           </label>
           <input
             type="text"
-            value={name}
+            value={username}
             required
-            onChange={(e) => setName(e.target.value)}
-            className="w-full mt-1 p-2 border border-gray-300 rounded"
-          />
-        </div>
-        <div>
-          <label className="mb-1 font-semibold flex items-center">
-            <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-1" />
-            Netfang:
-          </label>
-          <input
-            type="email"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full mt-1 p-2 border border-gray-300 rounded"
           />
         </div>

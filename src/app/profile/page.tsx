@@ -4,30 +4,31 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser, faEnvelope, faLock, faEdit, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faLock, faEdit, faSave, faShieldAlt } from '@fortawesome/free-solid-svg-icons'
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth()
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [role, setRole] = useState('')
 
   useEffect(() => {
     if (!user) {
+      // If not logged in, redirect to login
       router.push('/login')
     } else {
-      setName(user.name)
-      setEmail(user.email)
-      setPassword(user.password)
+      // Initialize form fields from user
+      setUsername(user.username)
+      setRole(user.role)
     }
   }, [user, router])
 
-  if (!user) return null
+  if (!user) return null // or a spinner
 
   const handleSave = () => {
-    updateProfile({ name, email, password })
+    // We only have 'username' and 'role' in user object. 'password' is optional, not used
+    updateProfile({ username, role, password: '' }) 
     setIsEditing(false)
   }
 
@@ -39,36 +40,24 @@ export default function ProfilePage() {
           <div>
             <label className="font-semibold flex items-center">
               <FontAwesomeIcon icon={faUser} className="w-4 h-4 mr-1" />
-              Nafn:
+              Notendanafn:
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
           <div>
             <label className="font-semibold flex items-center">
-              <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-1" />
-              Netfang:
+              <FontAwesomeIcon icon={faShieldAlt} className="w-4 h-4 mr-1" />
+              Hlutverk (role):
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 p-2 border border-gray-300 rounded"
-            />
-          </div>
-          <div>
-            <label className="font-semibold flex items-center">
-              <FontAwesomeIcon icon={faLock} className="w-4 h-4 mr-1" />
-              Lykilorð:
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              type="text"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full mt-1 p-2 border border-gray-300 rounded"
             />
           </div>
@@ -90,15 +79,15 @@ export default function ProfilePage() {
         <div className="space-y-4">
           <p className="flex items-center">
             <FontAwesomeIcon icon={faUser} className="w-4 h-4 mr-2" />
-            <span className="font-semibold">Nafn:</span> {user.name}
-          </p>
-          <p className="flex items-center">
-            <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4 mr-2" />
-            <span className="font-semibold">Netfang:</span> {user.email}
+            <span className="font-semibold">Notendanafn:</span> {user.username}
           </p>
           <p className="flex items-center">
             <FontAwesomeIcon icon={faLock} className="w-4 h-4 mr-2" />
-            <span className="font-semibold">Lykilorð:</span> {user.password}
+            <span className="font-semibold">Notendakenni (ID):</span> {user.id}
+          </p>
+          <p className="flex items-center">
+            <FontAwesomeIcon icon={faShieldAlt} className="w-4 h-4 mr-2" />
+            <span className="font-semibold">Hlutverk (role):</span> {user.role}
           </p>
           <button
             onClick={() => setIsEditing(true)}
