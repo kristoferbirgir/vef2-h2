@@ -22,25 +22,19 @@ export default function Navbar() {
   return (
     <nav className="bg-teal-600 shadow-lg">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Logo */}
         <Link href="/" className="text-white text-2xl font-bold">
           KRAB
         </Link>
-
-        {/* Right side: user info or login */}
         <div>
           {user ? (
             <div className="relative inline-block">
-              {/* User button that toggles the dropdown */}
               <button
                 onClick={handleToggleDropdown}
                 className="text-white hover:text-teal-200 flex items-center focus:outline-none"
               >
                 <FontAwesomeIcon icon={faUser} className="w-4 h-4 mr-1" />
-                {user.name}
+                {user.username}
               </button>
-
-              {/* Dropdown menu */}
               {dropdownOpen && (
                 <div className="absolute left-0 top-full mt-2 w-40 bg-white rounded shadow-md py-2 z-50">
                   <Link
