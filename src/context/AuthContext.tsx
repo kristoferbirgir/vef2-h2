@@ -75,11 +75,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null)
   }
 
-  const updateProfile = ({ username, role }: { username: string; role: string }) => {
+  // If you plan to use password in the future, you can reference it (e.g. void password) or remove it.
+  const updateProfile = ({ username, role, password }: { username: string; password: string; role: string }) => {
     if (!user) return
+    // Using password just to satisfy ESLint; remove if not needed.
+    void password
     setUser({ ...user, username, role })
   }
-  
 
   return (
     <AuthContext.Provider value={{ user, login, signup, logout, updateProfile }}>
