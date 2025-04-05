@@ -25,7 +25,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <main className="max-w-md mx-auto bg-white p-6 rounded shadow mt-8">
       <h2 className="text-xl font-bold mb-4">Skráning</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

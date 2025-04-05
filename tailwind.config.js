@@ -6,7 +6,15 @@ module.exports = {
     "./src/context/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          light: '#e0f2f1',
+          DEFAULT: '#26a69a',
+          dark: '#00796b'
+        }
+      },
+    },
   },
   plugins: [],
 }

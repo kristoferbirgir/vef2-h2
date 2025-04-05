@@ -12,10 +12,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-slate-900 min-h-screen flex flex-col">
+      <body className="bg-gradient-to-br from-blue-50 to-white text-slate-900 min-h-screen flex flex-col">
         <AuthProvider>
           <Navbar />
-          <main className="flex-grow container mx-auto px-4 py-8">
+          <main className="flex-grow container mx-auto px-4 py-8 bg-white shadow-lg rounded-md mt-4">
             {children}
           </main>
           <Footer />
