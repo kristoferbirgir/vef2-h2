@@ -6,7 +6,8 @@ import Image from 'next/image'
 interface UploadResult {
   public_id: string
   cloud_name: string
-  // Additional properties may be added as needed.
+  url: string
+  // Add additional properties if needed.
 }
 
 export default function AdminUploadPage() {
@@ -43,10 +44,15 @@ export default function AdminUploadPage() {
         body: formData,
       })
 
-      const uploadData = await uploadRes.json()
+      // Explicitly cast the parsed JSON as UploadResult.
+      const uploadData = (await uploadRes.json()) as UploadResult
       setUploadResult(uploadData)
-    } catch (error) {
-      console.error('Upload failed:', error)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Upload failed:', error.message)
+      } else {
+        console.error('Upload failed')
+      }
     }
     setLoading(false)
   }
@@ -68,8 +74,8 @@ export default function AdminUploadPage() {
           <h2 className="text-xl font-semibold mb-2">Upphlað mynd:</h2>
           <p className="mb-2">Public ID: {uploadResult.public_id}</p>
           <Image
-            src={`https://res.cloudinary.com/${uploadResult.cloud_name}/image/upload/${uploadResult.public_id}.jpg`}
-            alt="Upphlað mynd"
+            src={uploadResult.url}
+            alt="Upphlaða mynd"
             width={400}
             height={300}
             className="border"
