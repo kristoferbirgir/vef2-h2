@@ -28,13 +28,18 @@ export default function ImageFeed() {
         if (resImage.ok) {
           const data: ImageData = await resImage.json()
           setImage(data)
+        } else {
+          console.error('Failed to fetch random image', resImage.status)
         }
+        
         const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
           credentials: 'include'
         })
         if (resMedian.ok) {
           const data: MedianData = await resMedian.json()
           setMedian(data.median)
+        } else {
+          console.error('Failed to fetch median', resMedian.status)
         }
       } catch (error) {
         console.error('Error fetching image data:', error)
@@ -54,7 +59,7 @@ export default function ImageFeed() {
         <Image 
           src={image.url} 
           alt={image.prompt} 
-          fill
+          fill 
           style={{ objectFit: 'contain' }}
           sizes="(max-width: 768px) 100vw, 50vw"
         />
