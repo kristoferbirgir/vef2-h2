@@ -6,7 +6,7 @@ import Image from 'next/image'
 interface UploadResult {
   public_id: string
   cloud_name: string
-  // You can add additional properties if needed.
+  // Additional properties may be added as needed.
 }
 
 export default function AdminUploadPage() {
@@ -28,16 +28,16 @@ export default function AdminUploadPage() {
       const sigRes = await fetch('/api/signature')
       const { signature, timestamp, cloudName } = await sigRes.json()
 
-      // Create FormData and append upload details.
+      // Prepare FormData for the upload.
       const formData = new FormData()
       formData.append('file', file)
       formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '')
       formData.append('timestamp', String(timestamp))
       formData.append('signature', signature)
-      // Replace with your actual upload preset.
+      // Replace with your actual upload preset from Cloudinary.
       formData.append('upload_preset', 'your_upload_preset')
 
-      // Post the FormData to Cloudinary.
+      // Post the FormData to Cloudinary's upload API.
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
         method: 'POST',
         body: formData,
