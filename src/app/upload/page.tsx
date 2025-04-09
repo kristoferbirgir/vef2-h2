@@ -36,7 +36,7 @@ export default function AdminUploadPage() {
       formData.append('timestamp', String(timestamp))
       formData.append('signature', signature)
       // Replace with your actual upload preset from Cloudinary.
-      formData.append('upload_preset', 'your_upload_preset')
+      formData.append('upload_preset', 'ml_default')
 
       // Post the FormData to Cloudinary's upload API.
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
