@@ -22,7 +22,7 @@ export default function RatedImagesPage() {
   useEffect(() => {
     async function fetchRatedImages() {
       if (!user?.token) {
-        console.error('No auth token found')
+        console.error('Engin auðkenningartákn fundið')
         setLoading(false)
         return
       }
@@ -41,10 +41,10 @@ export default function RatedImagesPage() {
           const data: RatedImageData[] = await res.json()
           setRatedImages(data)
         } else {
-          console.error('Failed to fetch rated images –', res.status)
+          console.error('Mistókst að sækja metnar myndir –', res.status)
         }
       } catch (error) {
-        console.error('Error fetching rated images:', error)
+        console.error('Villa við að sækja metnar myndir:', error)
       }
       setLoading(false)
     }
@@ -52,14 +52,14 @@ export default function RatedImagesPage() {
   }, [user])
 
   if (loading) {
-    return <div>Loading your rated images...</div>
+    return <div>Hleður þínum myndum...</div>
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">My Rated Images</h1>
+      <h1 className="text-3xl font-bold mb-6">Mínar myndir</h1>
       {ratedImages.length === 0 ? (
-        <p>You have not rated any images yet.</p>
+        <p>Þú hefur ekki metið nein mynd.</p>
       ) : (
         ratedImages.map((img) => (
           <div key={img.id} className="bg-white rounded-lg shadow p-4 mb-6">
@@ -72,7 +72,7 @@ export default function RatedImagesPage() {
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
-            <p className="text-gray-700 mb-2">Prompt: {img.prompt}</p>
+            <p className="text-gray-700 mb-2">Innihald: {img.prompt}</p>
             <div className="flex items-center space-x-2">
               {img.currentRating === 1 ? (
                 <div className="flex items-center space-x-1 text-green-600">
