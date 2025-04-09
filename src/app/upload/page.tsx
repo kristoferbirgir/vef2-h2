@@ -4,16 +4,16 @@ import { useState, ChangeEvent } from 'react'
 import Image from 'next/image'
 
 interface UploadResult {
-  public_id: string
-  cloud_name: string
   url: string
-  // Add additional properties if needed.
+  public_id?: string
+  // Include additional properties based on your backend response.
 }
 
 export default function AdminUploadPage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [prompt, setPrompt] = useState('') // optional prompt for the image
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -25,25 +25,27 @@ export default function AdminUploadPage() {
     if (!file) return
     setLoading(true)
     try {
-      // Get signature, timestamp, and cloud name from backend API.
-      const sigRes = await fetch('/cloudinary')
-      const { signature, timestamp, cloudName } = await sigRes.json()
-
-      // Prepare FormData for the upload.
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '')
-      formData.append('timestamp', String(timestamp))
-      formData.append('signature', signature)
-      formData.append('upload_preset', 'ml_default')
+      // Optionally, include a prompt or name for the image.
+      if (prompt) {
+        formData.append('name', prompt)
+      }
 
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      // Call your backend endpoint which is protected (ensure you include your auth header if needed).
+      const res = await fetch('/cloudinary', {
         method: 'POST',
         body: formData,
+        // If you have a global auth mechanism, you might add:
+        // headers: { Authorization: `Bearer ${yourToken}` },
       })
 
-      const uploadData = (await uploadRes.json()) as UploadResult
-      setUploadResult(uploadData)
+      if (!res.ok) {
+        throw new Error(`Upload failed with status ${res.status}`)
+      }
+
+      const data = await res.json()
+      setUploadResult(data)
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Upload failed:', error.message)
@@ -56,23 +58,30 @@ export default function AdminUploadPage() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Mynda Stjórnun</h1>
-      <p className="mb-4">Veldu mynd til að hlaða upp:</p>
+      <h1 className="text-3xl font-bold mb-4">Admin Image Upload</h1>
+      <p className="mb-4">Choose an image to upload:</p>
       <input type="file" onChange={handleFileChange} className="mb-4" />
+      <input
+        type="text"
+        placeholder="Enter image prompt (optional)"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        className="mb-4 p-2 border rounded"
+      />
       <button
         onClick={handleUpload}
         disabled={!file || loading}
         className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50"
       >
-        {loading ? 'Hlaða upp...' : 'Hlaða upp mynd'}
+        {loading ? 'Uploading...' : 'Upload Image'}
       </button>
       {uploadResult && (
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Upphlað mynd:</h2>
-          <p className="mb-2">Public ID: {uploadResult.public_id}</p>
+          <h2 className="text-xl font-semibold mb-2">Uploaded Image:</h2>
+          {uploadResult.public_id && <p className="mb-2">Public ID: {uploadResult.public_id}</p>}
           <Image
             src={uploadResult.url}
-            alt="Upphlaða mynd"
+            alt="Uploaded image"
             width={400}
             height={300}
             className="border"
