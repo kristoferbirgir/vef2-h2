@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/context/AuthContext'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons'
 
 interface ImageData {
   id: string
@@ -21,26 +23,25 @@ export default function ImageFeed() {
   const API_BASE_URL = 'https://hopverk.up.railway.app'
   const { user } = useAuth()
 
+  // Fetch both random image and median on load
   useEffect(() => {
     async function fetchData() {
+      if (!user?.token) {
+        console.error('No auth token found')
+        return
+      }
+
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${user.token}`,
+      }
+
       try {
-        // Ensure we have a token before calling the endpoint
-        if (!user?.token) {
-          console.error('No auth token found')
-          return
-        }
-
-        // Send the token in the header
-        const authHeaders = {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`,
-        }
-
+        // Fetch random image
         const resImage = await fetch(`${API_BASE_URL}/images/random`, {
           headers: authHeaders,
-          credentials: 'include'
+          credentials: 'include',
         })
-
         if (resImage.ok) {
           const data: ImageData = await resImage.json()
           setImage(data)
@@ -48,11 +49,11 @@ export default function ImageFeed() {
           console.error('Failed to fetch random image –', resImage.status)
         }
 
+        // Fetch median rating
         const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
           headers: authHeaders,
-          credentials: 'include'
+          credentials: 'include',
         })
-
         if (resMedian.ok) {
           const data: MedianData = await resMedian.json()
           setMedian(data.median)
@@ -66,6 +67,41 @@ export default function ImageFeed() {
     fetchData()
   }, [user])
 
+  // Function to rate image (score of 1 for like, -1 for dislike)
+  const rateImage = async (score: 1 | -1) => {
+    if (!user?.token || !image) return
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${user.token}`,
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/images/rate/${image.id}`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({ score }),
+        credentials: 'include',
+      })
+      if (res.ok) {
+        console.log(`Image rated with score ${score}`)
+        // Optionally, refresh median rating after rating
+        const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
+          headers: authHeaders,
+          credentials: 'include',
+        })
+        if (resMedian.ok) {
+          const data: MedianData = await resMedian.json()
+          setMedian(data.median)
+        } else {
+          console.error('Failed to fetch median after rating –', resMedian.status)
+        }
+      } else {
+        console.error('Failed to rate image –', res.status)
+      }
+    } catch (error) {
+      console.error('Error rating image:', error)
+    }
+  }
+
   if (!image) {
     return <div>Loading image...</div>
   }
@@ -74,9 +110,9 @@ export default function ImageFeed() {
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
       <h2 className="text-xl font-bold mb-4">Random Image</h2>
       <div className="relative w-full h-64 mb-4">
-        <Image 
-          src={image.url} 
-          alt={image.prompt} 
+        <Image
+          src={image.url}
+          alt={image.prompt}
           fill
           style={{ objectFit: 'contain' }}
           sizes="(max-width: 768px) 100vw, 50vw"
@@ -84,8 +120,24 @@ export default function ImageFeed() {
       </div>
       <p className="text-gray-700 mb-2">Prompt: {image.prompt}</p>
       {median !== null && (
-        <p className="text-gray-700">Current Median Rating: {median}</p>
+        <p className="text-gray-700 mb-2">Current Median Rating: {median}</p>
       )}
+      <div className="flex space-x-4 mt-4">
+        <button
+          onClick={() => rateImage(1)}
+          className="flex items-center space-x-2 text-green-600 hover:text-green-800"
+        >
+          <FontAwesomeIcon icon={faThumbsUp} className="w-6 h-6" />
+          <span>Like</span>
+        </button>
+        <button
+          onClick={() => rateImage(-1)}
+          className="flex items-center space-x-2 text-red-600 hover:text-red-800"
+        >
+          <FontAwesomeIcon icon={faThumbsDown} className="w-6 h-6" />
+          <span>Dislike</span>
+        </button>
+      </div>
     </div>
   )
 }
