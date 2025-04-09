@@ -26,7 +26,7 @@ export default function AdminUploadPage() {
     setLoading(true)
     try {
       // Get signature, timestamp, and cloud name from backend API.
-      const sigRes = await fetch('/api/signature')
+      const sigRes = await fetch('/cloudinary')
       const { signature, timestamp, cloudName } = await sigRes.json()
 
       // Prepare FormData for the upload.
