@@ -13,24 +13,26 @@ interface ImageData {
   createdAt: string
 }
 
-interface MedianData {
-  median: number
+interface RatingInfo {
+  likeCount: number
+  dislikeCount: number
+  likePercentage: number
 }
 
 export default function ImageFeed() {
   const [image, setImage] = useState<ImageData | null>(null)
-  const [median, setMedian] = useState<number | null>(null)
+  const [ratingInfo, setRatingInfo] = useState<RatingInfo | null>(null)
   const [finished, setFinished] = useState<boolean>(false)
   const API_BASE_URL = 'https://hopverk.up.railway.app'
   const { user } = useAuth()
 
-  // Function to fetch a random image and the median rating.
-  const fetchImageAndMedian = useCallback(async () => {
+  // Function to fetch a random image and then its ratings info.
+  const fetchImageAndRatings = useCallback(async () => {
     if (!user?.token) {
       console.error('No auth token found')
       return
     }
-    
+
     const authHeaders = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${user.token}`,
@@ -43,40 +45,38 @@ export default function ImageFeed() {
         credentials: 'include',
       })
 
-      // If no images left to rate, set finished
       if (resImage.status === 404) {
         setFinished(true)
         setImage(null)
-        setMedian(null)
+        setRatingInfo(null)
         return
       } else if (resImage.ok) {
         const data: ImageData = await resImage.json()
         setImage(data)
         setFinished(false)
+        
+        // Once we have an image, fetch its rating breakdown.
+        const resRatings = await fetch(`${API_BASE_URL}/images/${data.id}/ratings`, {
+          headers: authHeaders,
+          credentials: 'include',
+        })
+        if (resRatings.ok) {
+          const ratingData: RatingInfo = await resRatings.json()
+          setRatingInfo(ratingData)
+        } else {
+          console.error('Failed to fetch rating info –', resRatings.status)
+        }
       } else {
         console.error('Failed to fetch random image –', resImage.status)
-      }
-
-      // Fetch median rating after getting an image
-      const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
-        headers: authHeaders,
-        credentials: 'include',
-      })
-      if (resMedian.ok) {
-        const data: MedianData = await resMedian.json()
-        setMedian(data.median)
-      } else {
-        console.error('Failed to fetch median –', resMedian.status)
       }
     } catch (error) {
       console.error('Error fetching image data:', error)
     }
   }, [API_BASE_URL, user])
 
-  // On component mount or token change, load an image
   useEffect(() => {
-    fetchImageAndMedian()
-  }, [fetchImageAndMedian])
+    fetchImageAndRatings()
+  }, [fetchImageAndRatings])
 
   // Function to rate image (score of 1 for like, -1 for dislike)
   const rateImage = async (score: 1 | -1) => {
@@ -94,16 +94,16 @@ export default function ImageFeed() {
       })
       if (res.ok) {
         console.log(`Image rated with score ${score}`)
-        // Refresh median rating after rating
-        const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
+        // Refresh the rating breakdown after rating.
+        const resRatings = await fetch(`${API_BASE_URL}/images/${image.id}/ratings`, {
           headers: authHeaders,
           credentials: 'include',
         })
-        if (resMedian.ok) {
-          const data: MedianData = await resMedian.json()
-          setMedian(data.median)
+        if (resRatings.ok) {
+          const ratingData: RatingInfo = await resRatings.json()
+          setRatingInfo(ratingData)
         } else {
-          console.error('Failed to fetch median after rating –', resMedian.status)
+          console.error('Failed to fetch rating info after rating –', resRatings.status)
         }
       } else {
         console.error('Failed to rate image –', res.status)
@@ -113,9 +113,9 @@ export default function ImageFeed() {
     }
   }
 
-  // Function to load the next image
+  // Function to load the next image.
   const nextImage = async () => {
-    await fetchImageAndMedian()
+    await fetchImageAndRatings()
   }
 
   if (finished) {
@@ -135,17 +135,23 @@ export default function ImageFeed() {
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
       <h2 className="text-xl font-bold mb-4">Random Image</h2>
       <div className="relative w-full h-64 mb-4">
-        <Image 
-          src={image.url} 
-          alt={image.prompt} 
-          fill 
+        <Image
+          src={image.url}
+          alt={image.prompt}
+          fill
           style={{ objectFit: 'contain' }}
           sizes="(max-width: 768px) 100vw, 50vw"
         />
       </div>
       <p className="text-gray-700 mb-2">Prompt: {image.prompt}</p>
-      {median !== null && (
-        <p className="text-gray-700 mb-4">Current Median Rating: {median}</p>
+      {ratingInfo && (
+        <div className="mb-4">
+          <p className="text-gray-700">
+            <strong>Likes:</strong> {ratingInfo.likeCount} &nbsp;
+            <strong>Dislikes:</strong> {ratingInfo.dislikeCount} &nbsp;
+            <strong>Like Percentage:</strong> {ratingInfo.likePercentage.toFixed(1)}%
+          </p>
+        </div>
       )}
       <div className="flex items-center space-x-4">
         <button
@@ -167,7 +173,7 @@ export default function ImageFeed() {
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
         >
           <FontAwesomeIcon icon={faForward} className="w-6 h-6" />
-          <span>Next Image</span>
+          <span>Næsta mynd</span>
         </button>
       </div>
     </div>

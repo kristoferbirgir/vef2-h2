@@ -49,7 +49,6 @@ export default function AdminUploadPage() {
       }
 
       const data = await res.json()
-      // Your backend returns an object containing "image" in the response.
       setUploadResult(data.image)
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -63,8 +62,8 @@ export default function AdminUploadPage() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-4">Admin Image Upload</h1>
-      <p className="mb-4">Choose an image to upload:</p>
+      <h1 className="text-3xl font-bold mb-4">Hlaða niður mynd</h1>
+      <p className="mb-4">Veldu mynd:</p>
       <input type="file" onChange={handleFileChange} className="mb-4" />
       <input
         type="text"
@@ -82,7 +81,7 @@ export default function AdminUploadPage() {
       </button>
       {uploadResult && (
         <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Uploaded Image:</h2>
+          <h2 className="text-xl font-semibold mb-2">Upphlaðinn mynd:</h2>
           {uploadResult.public_id && <p className="mb-2">Public ID: {uploadResult.public_id}</p>}
           <Image
             src={uploadResult.url}
