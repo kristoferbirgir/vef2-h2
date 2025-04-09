@@ -11,6 +11,9 @@ interface RatedImageData {
   url: string
   prompt: string
   currentRating: number  // 1 for like, -1 for dislike
+  likeCount: number
+  dislikeCount: number
+  likePercentage: number  // e.g., 75 means 75%
 }
 
 export default function RatedImagesPage() {
@@ -52,7 +55,7 @@ export default function RatedImagesPage() {
   }, [user])
 
   if (loading) {
-    return <div>Hleður þínum myndum...</div>
+    return <div>Hleður metnum myndum þínum...</div>
   }
 
   return (
@@ -73,18 +76,23 @@ export default function RatedImagesPage() {
               />
             </div>
             <p className="text-gray-700 mb-2">Innihald: {img.prompt}</p>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 mb-2">
               {img.currentRating === 1 ? (
                 <div className="flex items-center space-x-1 text-green-600">
                   <FontAwesomeIcon icon={faThumbsUp} className="w-5 h-5" />
-                  <span>Liked</span>
+                  <span>Mín like</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-1 text-red-600">
                   <FontAwesomeIcon icon={faThumbsDown} className="w-5 h-5" />
-                  <span>Disliked</span>
+                  <span>Mín dislike</span>
                 </div>
               )}
+            </div>
+            <div className="text-gray-700">
+              <p><strong>Likes:</strong> {img.likeCount}</p>
+              <p><strong>Dislikes:</strong> {img.dislikeCount}</p>
+              <p><strong>Prósenta:</strong> {img.likePercentage.toFixed(1)}%</p>
             </div>
           </div>
         ))
