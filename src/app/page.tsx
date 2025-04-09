@@ -18,7 +18,8 @@ export default function HomePage() {
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold mb-4">Velkominn á KRAB</h1>
           <p className="text-gray-700 mb-6">
-            Discover a new way to engage with posts. Vote with a like or dislike and see an average score based on user feedback.
+          Uppgötvaðu nýjan hátt til að taka þátt í færslum. Gefðu like eða dislike og sjáðu fjölda like/dislike, ásamt prósentureikning.
+
           </p>
           <div className="text-center">
             <Link
