@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/context/AuthContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons'
+import { faThumbsUp, faThumbsDown, faForward } from '@fortawesome/free-solid-svg-icons'
 
 interface ImageData {
   id: string
@@ -23,49 +23,51 @@ export default function ImageFeed() {
   const API_BASE_URL = 'https://hopverk.up.railway.app'
   const { user } = useAuth()
 
-  // Fetch both random image and median on load
-  useEffect(() => {
-    async function fetchData() {
-      if (!user?.token) {
-        console.error('No auth token found')
-        return
-      }
-
-      const authHeaders = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${user.token}`,
-      }
-
-      try {
-        // Fetch random image
-        const resImage = await fetch(`${API_BASE_URL}/images/random`, {
-          headers: authHeaders,
-          credentials: 'include',
-        })
-        if (resImage.ok) {
-          const data: ImageData = await resImage.json()
-          setImage(data)
-        } else {
-          console.error('Failed to fetch random image –', resImage.status)
-        }
-
-        // Fetch median rating
-        const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
-          headers: authHeaders,
-          credentials: 'include',
-        })
-        if (resMedian.ok) {
-          const data: MedianData = await resMedian.json()
-          setMedian(data.median)
-        } else {
-          console.error('Failed to fetch median –', resMedian.status)
-        }
-      } catch (error) {
-        console.error('Error fetching image data:', error)
-      }
+  // Function to fetch a random image and the median rating.
+  const fetchImageAndMedian = useCallback(async () => {
+    if (!user?.token) {
+      console.error('No auth token found')
+      return
     }
-    fetchData()
-  }, [user])
+    
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${user.token}`,
+    }
+
+    try {
+      // Fetch random image
+      const resImage = await fetch(`${API_BASE_URL}/images/random`, {
+        headers: authHeaders,
+        credentials: 'include',
+      })
+      if (resImage.ok) {
+        const data: ImageData = await resImage.json()
+        setImage(data)
+      } else {
+        console.error('Failed to fetch random image –', resImage.status)
+      }
+
+      // Fetch median rating
+      const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
+        headers: authHeaders,
+        credentials: 'include',
+      })
+      if (resMedian.ok) {
+        const data: MedianData = await resMedian.json()
+        setMedian(data.median)
+      } else {
+        console.error('Failed to fetch median –', resMedian.status)
+      }
+    } catch (error) {
+      console.error('Error fetching image data:', error)
+    }
+  }, [API_BASE_URL, user])
+
+  // On component mount, load an image
+  useEffect(() => {
+    fetchImageAndMedian()
+  }, [fetchImageAndMedian])
 
   // Function to rate image (score of 1 for like, -1 for dislike)
   const rateImage = async (score: 1 | -1) => {
@@ -83,7 +85,7 @@ export default function ImageFeed() {
       })
       if (res.ok) {
         console.log(`Image rated with score ${score}`)
-        // Optionally, refresh median rating after rating
+        // After rating, update the median
         const resMedian = await fetch(`${API_BASE_URL}/images/median`, {
           headers: authHeaders,
           credentials: 'include',
@@ -100,6 +102,11 @@ export default function ImageFeed() {
     } catch (error) {
       console.error('Error rating image:', error)
     }
+  }
+
+  // Function to load the next image
+  const nextImage = async () => {
+    await fetchImageAndMedian()
   }
 
   if (!image) {
@@ -120,9 +127,9 @@ export default function ImageFeed() {
       </div>
       <p className="text-gray-700 mb-2">Prompt: {image.prompt}</p>
       {median !== null && (
-        <p className="text-gray-700 mb-2">Current Median Rating: {median}</p>
+        <p className="text-gray-700 mb-4">Current Median Rating: {median}</p>
       )}
-      <div className="flex space-x-4 mt-4">
+      <div className="flex items-center space-x-4">
         <button
           onClick={() => rateImage(1)}
           className="flex items-center space-x-2 text-green-600 hover:text-green-800"
@@ -136,6 +143,13 @@ export default function ImageFeed() {
         >
           <FontAwesomeIcon icon={faThumbsDown} className="w-6 h-6" />
           <span>Dislike</span>
+        </button>
+        <button
+          onClick={nextImage}
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+        >
+          <FontAwesomeIcon icon={faForward} className="w-6 h-6" />
+          <span>Next Image</span>
         </button>
       </div>
     </div>
