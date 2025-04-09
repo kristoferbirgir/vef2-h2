@@ -7,14 +7,14 @@ import { useAuth } from '@/context/AuthContext'
 interface UploadResult {
   url: string
   public_id?: string
-  // Include additional properties based on your backend response.
+  // Additional properties as returned by your backend.
 }
 
 export default function AdminUploadPage() {
   const [file, setFile] = useState<File | null>(null)
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [loading, setLoading] = useState(false)
-  const [prompt, setPrompt] = useState('') // optional prompt for the image
+  const [prompt, setPrompt] = useState('') // Optional prompt for the image
   const { user } = useAuth()
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -29,18 +29,17 @@ export default function AdminUploadPage() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      // Optionally, include a prompt or name for the image.
+      // Note: The backend upload endpoint requires a field named "prompt"
       if (prompt) {
-        formData.append('name', prompt)
+        formData.append('prompt', prompt)
       }
-      
+
       // Use the backend URL from environment or fallback to your Railway URL.
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hopverk.up.railway.app'
-      const res = await fetch(`${API_URL}/cloudinary`, {
+      const res = await fetch(`${API_URL}/admin/upload`, {
         method: 'POST',
         body: formData,
         headers: {
-          // Include the token if the user is logged in.
           Authorization: `Bearer ${user?.token || ''}`
         }
       })
@@ -50,7 +49,8 @@ export default function AdminUploadPage() {
       }
 
       const data = await res.json()
-      setUploadResult(data)
+      // Your backend returns an object containing "image" in the response.
+      setUploadResult(data.image)
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Upload failed:', error.message)
