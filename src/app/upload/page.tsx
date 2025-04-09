@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent } from 'react'
 import Image from 'next/image'
+import { useAuth } from '@/context/AuthContext'
 
 interface UploadResult {
   url: string
@@ -14,6 +15,7 @@ export default function AdminUploadPage() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [prompt, setPrompt] = useState('') // optional prompt for the image
+  const { user } = useAuth()
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -31,14 +33,16 @@ export default function AdminUploadPage() {
       if (prompt) {
         formData.append('name', prompt)
       }
-
-      // Use the backend URL from the environment or fallback to your Railway backend
+      
+      // Use the backend URL from environment or fallback to your Railway URL.
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hopverk.up.railway.app'
       const res = await fetch(`${API_URL}/cloudinary`, {
         method: 'POST',
         body: formData,
-        // If you have a global auth mechanism, you might add:
-        // headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: {
+          // Include the token if the user is logged in.
+          Authorization: `Bearer ${user?.token || ''}`
+        }
       })
 
       if (!res.ok) {
