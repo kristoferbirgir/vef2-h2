@@ -32,12 +32,13 @@ export default function AdminUploadPage() {
         formData.append('name', prompt)
       }
 
-      // Call your backend endpoint which is protected (ensure you include your auth header if needed).
-      const res = await fetch('/cloudinary', {
+      // Use the backend URL from the environment or fallback to your Railway backend
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hopverk.up.railway.app'
+      const res = await fetch(`${API_URL}/cloudinary`, {
         method: 'POST',
         body: formData,
         // If you have a global auth mechanism, you might add:
-        // headers: { Authorization: `Bearer ${yourToken}` },
+        // headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })
 
       if (!res.ok) {
